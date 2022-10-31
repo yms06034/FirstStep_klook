@@ -4,8 +4,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
-import time
-import re
+import time, csv
+import pymysql
+import pandas as pd
+
+# docker mysql server connect
+conn = pymysql.connect(
+    host='localhost',
+    user='root',
+    password='password',
+    db='klook',
+    charset='utf8'
+)
+cur = conn.cursor()
 
 # Options Setting
 options = webdriver.ChromeOptions()
@@ -39,31 +50,46 @@ click_list = ['62492549-e40b-4f9d-8f79-48f9eb50d39b', '00bb51f9-922d-46f4-83e5-3
 for i in click_list:
     click_tag = find(f"li[id='{i}'] > button")
     click_tag.click()
-    time.sleep(1.5)
+    time.sleep(3)
 
 time.sleep(5)
 
-for i in range(2, 6):
+img_scr = []
+title = []
+place_info = []
+tag_info= []
+
+for i in range(2, 700):
     search_imgs = finds("div[class='photo'] > a > img")
     for img in search_imgs:
-        print(img.get_attribute('src'))
+        img_scr.append(img.get_attribute('src'))
 
     seacrh_text = finds("div[class='tit'] > a")
     for text in seacrh_text:
-        print(text.text)
+        title.append(text.text)
 
     search_place = finds_xpath("//*/div/div/ul/li/div/p[1]")
     for place in search_place:
-        print(place.text)
+        place_info.append(place.text)
 
     serach_tag = finds_xpath("//*/div/div/ul/li/div/p[3]")
     for tag in serach_tag:
-        print(tag.get_attribute('textContent'))
+        tag_info.append(tag.get_attribute('textContent'))
 
     click_btn = find(f"div[class='page_box'] > a[id='{i}']")
     click_btn.click()
 
     time.sleep(5)
 
+browser.close()
 
-# browser.close()
+items = [item for item in zip(img_scr, title, place_info, tag_info)]
+
+with open ('klook.csv', 'w', encoding='utf-8', newline='') as f:
+    csvWriter = csv.writer(f)
+    for i in items:
+        csvWriter.writerow(i)
+# print(items)
+# mysql insret
+# cur.execute("DROP TABEL IF EXISTS travelinfo;")
+

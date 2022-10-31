@@ -664,4 +664,5 @@ $RECYCLE.BIN/
 # sqlite
 *.db
 
+*.csv
 # End of https://www.toptal.com/developers/gitignore/api/python,flask,macos,windows,vs
