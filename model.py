@@ -1,5 +1,6 @@
 import pandas as pd
 import pymysql
+from sqlalchemy import create_engine
 
 df = pd.read_csv('klook.csv')
 df = pd.read_csv('klook.csv', names=['img_scr', 'title', 'place', 'tag'] ,header=0)
@@ -25,27 +26,28 @@ df.columns = df.columns.str.replace(' ', '')
 
 df_2 = df.copy()
 
+df_2.drop(df.index[355],inplace=True)
+
 df_2['tag'] = df_2['tag'].str.replace('#', ' ')
 df_2['tag'] = df_2['tag'].str.lstrip()
 
-conn = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='password',
-    db='klook',
-    charset='utf8'
-)
-cur = conn.cursor()
+pymysql.install_as_MySQLdb()
+import MySQLdb
 
-# mysql insret
-cur.execute("DROP TABLE IF EXISTS travelinfo;")
+# conn = pymysql.connect(
+#     host='localhost',
+#     user='root',
+#     password='password',
+#     db='klook',
+#     charset='utf8'
+# )
+# cur = conn.cursor()
 
-t_c_travelinfo = cur.execute ("""CREATE TABLE travelinfo (
-    id INT NOT NILL AUTO_INCREMENT,
-    img VARCHAR(255) NOT NULL,
-    place VARCHAR(255) NOT NULL,
-    tag VARCHAR(255), NOT NULL,
-    PRIMARY KEY (id)
-);
-""")
+# # mysql insret
+# cur.execute("DROP TABLE IF EXISTS travelinfo;")
+DB_CONNECT_PATH = 'mysql+pymysql://root:password@localhost/klook?charset=utf8'
 
+engine = create_engine(DB_CONNECT_PATH)
+conn = engine.connect()
+
+df_2.to_sql(name='travelinfo', con=engine, if_exists='append')

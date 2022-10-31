@@ -1,22 +1,8 @@
-from webbrowser import Chrome
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
-import time, csv
-import pymysql
+import time
 import pandas as pd
 
-# docker mysql server connect
-conn = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='password',
-    db='klook',
-    charset='utf8'
-)
-cur = conn.cursor()
 
 # Options Setting
 options = webdriver.ChromeOptions()
@@ -59,7 +45,7 @@ title = []
 place_info = []
 tag_info= []
 
-for i in range(2, 700):
+for i in range(1, 2):
     search_imgs = finds("div[class='photo'] > a > img")
     for img in search_imgs:
         img_scr.append(img.get_attribute('src'))
@@ -82,19 +68,9 @@ for i in range(2, 700):
     time.sleep(5)
 
 browser.close()
-
 # items = [item for item in zip(img_scr, title, place_info, tag_info)]
 
 data = {"img_scr" : img_scr, "title":title, "place":place_info, "tag":tag_info}
 df = pd.DataFrame(data)
 
 df.to_csv("klook_2.csv", encoding = "utf-8-sig")
-
-# with open ('klook.csv', 'w', encoding='utf-8', newline='') as f:
-#     csvWriter = csv.writer(f)
-#     for i in items:
-#         csvWriter.writerow(i)
-# print(items)
-# mysql insret
-cur.execute("DROP TABEL IF EXISTS travelinfo;")
-
